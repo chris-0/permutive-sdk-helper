@@ -1,4 +1,31 @@
 module PermutiveTools
+    def PermutiveTools.deleteExistingGlue(filename)
+        begin
+          File.open(filename, 'r') do |f| File.delete(f)
+        end
+        rescue Errno::ENOENT
+        end
+    end
+    
+    def PermutiveTools.buildStructureList(directory)
+        fileList = Dir["#{directory}/*.swift"]
+        
+        names = []
+        fileList.each { |file|
+            structDeclaration = `swiftc -dump-parse #{file} | grep "struct_decl"`.split("\n")
+            declNames = []
+            structDeclaration.each { |decl|
+                indent = (decl.index(/[^ ]/) / 2) - 1
+                name = decl[/"(.*)"/, 1]
+                          
+                declNames = declNames.first(indent)
+                declNames << name
+                          
+                names << declNames.join(".")
+            }
+        }
+        names
+    end
     
     def PermutiveTools.generateGlueFile(filename, structureList)
         # Generate Swift file boilerplate
@@ -9,9 +36,6 @@ module PermutiveTools
           "",
           "",
           "import Permutive_iOS",
-          "",
-          "",
-          "protocol EventType: Codable {}",
           "",
           ""
         ].join("\n") + "\n"
