@@ -1,6 +1,40 @@
 require 'xcodeproj'
 
 module PermutiveTools
+    def PermutiveTools.sanitiseSwift(files)
+        files.each { |file|
+            codeText = File.read(file)
+
+            in_struct = false
+            in_enum = false
+            result = ""
+            codeText.each_line do |line|
+                if line.start_with? "struct "
+                    if line.end_with? ": Codable {\n"
+                        line = "\n" + line.chomp(": Codable {\n") + " {\n"
+                    end
+                    in_struct = true
+                elsif line.lstrip.start_with? "enum "
+                    in_enum = true
+                end
+                
+                if in_struct && !in_enum
+                    result.concat(line)
+                end
+                
+                if line.start_with? "}"
+                    in_struct = false
+                elsif line.lstrip.start_with? "}"
+                    in_enum = false
+                end
+            end
+            # Write sanitised content back
+            File.open(filename, 'w') { |file|
+                file.write(codeText)
+            }
+        }
+    end
+    
     def PermutiveTools.deleteExistingGlue(filename)
         begin
           File.open(filename, 'r') do |f| File.delete(f)

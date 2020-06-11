@@ -29,9 +29,13 @@ end
 
 puts("permutive-sdk-helper. Searching '#{source}'")
 source = source.chomp("/")
+swiftFiles = Dir["#{source}/*.swift"]
 
 # Delete any existing generated file
 PermutiveTools.deleteExistingGlue("#{source}/PermutiveHelper.swift")
+
+# Remove unwanted code from Swift files
+PermutiveTools.sanitiseSwift(swiftFiles)
 
 # Find the structures which need extensions
 structures = PermutiveTools.buildStructureList(source)
@@ -55,6 +59,5 @@ if targetObject == nil
     return
 end
 
-swiftFiles = Dir["#{source}/*.swift"]
 PermutiveTools.addFilesToProject(project, swiftFiles, targetObject)
 puts("Success: Added #{swiftFiles.count} files to project '#{xcodeProject}'")
