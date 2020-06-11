@@ -1,5 +1,3 @@
-def hi(name = "World")
-  puts "Hello #{name.capitalize}!"
-end
+require "./PermutiveTools"
 
-hi()
+PermutiveTools.generateGlueFile("PermutiveHelper.swift", ["Pageview", "Pageview.Content", "Pageview.Metadata", "Slotrendered"])
