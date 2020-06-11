@@ -1,8 +1,13 @@
 module PermutiveTools
     
     def PermutiveTools.generateGlueFile(filename, structureList)
-        
+        # Generate Swift file boilerplate
         glueFileContent = [
+          "//",
+          "// Copyright 2020 Permutive Ltd.",
+          "//",
+          "",
+          "",
           "import Permutive_iOS",
           "",
           "",
@@ -12,13 +17,16 @@ module PermutiveTools
         ].join("\n") + "\n"
         
         eventNames = []
+        # Generate required extension for each defined structure
         structureList.each { |structure|
             glueFileContent.concat("extension #{structure}: Codable {}\n")
             if !structure.include? "."
+                # If the structure name is top-level, keep as event name
                 eventNames << structure
             end
         }
         
+        # Generate track function for each defined event name
         eventNames.each { |eventName|
             eventFunction = [
             "\n",
