@@ -1,3 +1,5 @@
+require 'xcodeproj'
+
 module PermutiveTools
     def PermutiveTools.deleteExistingGlue(filename)
         begin
@@ -71,5 +73,33 @@ module PermutiveTools
             file.write(glueFileContent)
         }
         
+    end
+                          
+    def PermutiveTools.addFilesToProject(project, files, target)
+      # Find a root folder in the users Xcode Project called Pods, or make one
+      permutiveGroup = project.main_group["Permutive"]
+      unless permutiveGroup
+        puts("Creating group Permutive")
+        permutiveGroup = project.main_group.new_group("Permutive")
+      end
+
+      # Add the files to the found Permutive group
+      fileReferences = files.map { |file|
+        filePath = Pathname.new(File.expand_path(file))
+        puts("Processing #{filePath}")
+                          
+        fileRef = permutiveGroup.files.find { |groupFile| groupFile.real_path == filePath }
+        unless fileRef
+          fileRef = permutiveGroup.new_file(filePath)
+        end
+        fileRef
+      }
+                          
+      # Ensure that the file is added to target
+      unless target.source_build_phase.files_references.include?(fileReferences)
+        target.add_file_references(fileReferences)
+      end
+
+      project.save
     end
 end
